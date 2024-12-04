@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -34,12 +35,30 @@
         button:hover {
             opacity: 0.9;
         }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+            display: none;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
     </style>
 
     <!-- CleverTap Integration -->
     <script type="text/javascript">
+        // Initialize clevertap object
         var clevertap = {event:[], profile:[], account:[], onUserLogin:[], notifications:[], privacy:[]};
+        // Replace with your actual CleverTap ID
         clevertap.account.push({"id": "Z44-Z4K-K65Z"});
+        
+        // Load CleverTap SDK
         (function () {
             var wzrk = document.createElement('script');
             wzrk.type = 'text/javascript';
@@ -48,6 +67,11 @@
             var s = document.getElementsByTagName('script')[0];
             s.parentNode.insertBefore(wzrk, s);
         })();
+
+        // Add SDK ready check
+        function isSdkReady() {
+            return typeof clevertap !== 'undefined' && clevertap.hasOwnProperty('event');
+        }
     </script>
 </head>
 <body>
@@ -74,9 +98,32 @@
         <button onclick="handleProfilePush()">Profile Push</button>
         <button onclick="handleAskPush()">Ask For Push</button>
         <button onclick="raiseEvent()">Raise Event</button>
+
+        <div id="status"></div>
     </div>
 
     <script>
+        function showStatus(message, isError = false) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.style.display = 'block';
+            statusDiv.className = isError ? 'error' : 'success';
+            console.log(message);
+        }
+
+        function validateForm() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const dob = document.getElementById('dob').value;
+
+            if (!name || !email || !phone || !dob) {
+                showStatus('Please fill in all fields', true);
+                return false;
+            }
+            return true;
+        }
+
         function getFormData() {
             return {
                 "Name": document.getElementById('name').value,
@@ -87,38 +134,104 @@
         }
 
         function handleLogin() {
-            clevertap.onUserLogin.push({
-                "Site": getFormData()
-            });
+            console.log('Login button clicked');
+            if (!validateForm()) return;
+            
+            if (!isSdkReady()) {
+                showStatus('CleverTap SDK not ready. Please try again in a few seconds.', true);
+                return;
+            }
+
+            try {
+                const data = getFormData();
+                clevertap.onUserLogin.push({
+                    "Site": data
+                });
+                showStatus('Login event sent successfully');
+                console.log('Login data sent:', data);
+            } catch (error) {
+                showStatus('Error sending login event: ' + error.message, true);
+                console.error('Login error:', error);
+            }
         }
 
         function handleProfilePush() {
-            clevertap.profile.push({
-                "Site": getFormData()
-            });
+            console.log('Profile Push button clicked');
+            if (!validateForm()) return;
+            
+            if (!isSdkReady()) {
+                showStatus('CleverTap SDK not ready. Please try again in a few seconds.', true);
+                return;
+            }
+
+            try {
+                const data = getFormData();
+                clevertap.profile.push({
+                    "Site": data
+                });
+                showStatus('Profile updated successfully');
+                console.log('Profile data sent:', data);
+            } catch (error) {
+                showStatus('Error updating profile: ' + error.message, true);
+                console.error('Profile push error:', error);
+            }
         }
 
         function handleAskPush() {
-            clevertap.notifications.push({
-                "titleText": 'Would you like to receive Push Notifications?',
-                "bodyText": 'We promise to only send you relevant content and give you updates on your transactions',
-                "okButtonText": 'Sign me up!',
-                "rejectButtonText": 'No thanks',
-                "askAgainTimeInSeconds": 5,
-                "okButtonColor": '#f28046'
-            });
+            console.log('Ask Push button clicked');
+            if (!isSdkReady()) {
+                showStatus('CleverTap SDK not ready. Please try again in a few seconds.', true);
+                return;
+            }
+
+            try {
+                clevertap.notifications.push({
+                    "titleText": 'Would you like to receive Push Notifications?',
+                    "bodyText": 'We promise to only send you relevant content and give you updates on your transactions',
+                    "okButtonText": 'Sign me up!',
+                    "rejectButtonText": 'No thanks',
+                    "askAgainTimeInSeconds": 5,
+                    "okButtonColor": '#f28046'
+                });
+                showStatus('Push notification prompt displayed');
+            } catch (error) {
+                showStatus('Error showing push notification prompt: ' + error.message, true);
+                console.error('Push notification error:', error);
+            }
         }
 
         function raiseEvent() {
-            clevertap.event.push("Custom Event", {
-                "string_property": "Test String",
-                "number_property": 42,
-                "float_property": 3.14,
-                "date_property": new Date(),
-                "array_property": ["item1", "item2"],
-                "boolean_property": true
-            });
+            console.log('Raise Event button clicked');
+            if (!isSdkReady()) {
+                showStatus('CleverTap SDK not ready. Please try again in a few seconds.', true);
+                return;
+            }
+
+            try {
+                clevertap.event.push("Custom Event", {
+                    "string_property": "Test String",
+                    "number_property": 42,
+                    "float_property": 3.14,
+                    "date_property": new Date(),
+                    "array_property": ["item1", "item2"],
+                    "boolean_property": true
+                });
+                showStatus('Custom event sent successfully');
+                console.log('Custom event sent');
+            } catch (error) {
+                showStatus('Error sending custom event: ' + error.message, true);
+                console.error('Custom event error:', error);
+            }
         }
+
+        // Check SDK loading status
+        window.addEventListener('load', function() {
+            if (isSdkReady()) {
+                showStatus('CleverTap SDK loaded successfully');
+            } else {
+                showStatus('Waiting for CleverTap SDK to load...', true);
+            }
+        });
     </script>
 </body>
 </html>
