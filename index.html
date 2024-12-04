@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CleverTap Integration Demo</title>
+    <style>
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #f28046;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+
+    <!-- CleverTap Integration -->
+    <script type="text/javascript">
+        var clevertap = {event:[], profile:[], account:[], onUserLogin:[], notifications:[], privacy:[]};
+        clevertap.account.push({"id": "Z44-Z4K-K65Z"});
+        (function () {
+            var wzrk = document.createElement('script');
+            wzrk.type = 'text/javascript';
+            wzrk.async = true;
+            wzrk.src = ('https:' == document.location.protocol ? 'https://d2r1yp2w7bby2u.cloudfront.net' : 'http://static.clevertap.com') + '/js/clevertap.min.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(wzrk, s);
+        })();
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>CleverTap Demo Form</h2>
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone:</label>
+            <input type="tel" id="phone" required>
+        </div>
+        <div class="form-group">
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob" required>
+        </div>
+        
+        <button onclick="handleLogin()">Login</button>
+        <button onclick="handleProfilePush()">Profile Push</button>
+        <button onclick="handleAskPush()">Ask For Push</button>
+        <button onclick="raiseEvent()">Raise Event</button>
+    </div>
+
+    <script>
+        function getFormData() {
+            return {
+                "Name": document.getElementById('name').value,
+                "Email": document.getElementById('email').value,
+                "Phone": document.getElementById('phone').value,
+                "DOB": new Date(document.getElementById('dob').value)
+            };
+        }
+
+        function handleLogin() {
+            clevertap.onUserLogin.push({
+                "Site": getFormData()
+            });
+        }
+
+        function handleProfilePush() {
+            clevertap.profile.push({
+                "Site": getFormData()
+            });
+        }
+
+        function handleAskPush() {
+            clevertap.notifications.push({
+                "titleText": 'Would you like to receive Push Notifications?',
+                "bodyText": 'We promise to only send you relevant content and give you updates on your transactions',
+                "okButtonText": 'Sign me up!',
+                "rejectButtonText": 'No thanks',
+                "askAgainTimeInSeconds": 5,
+                "okButtonColor": '#f28046'
+            });
+        }
+
+        function raiseEvent() {
+            clevertap.event.push("Custom Event", {
+                "string_property": "Test String",
+                "number_property": 42,
+                "float_property": 3.14,
+                "date_property": new Date(),
+                "array_property": ["item1", "item2"],
+                "boolean_property": true
+            });
+        }
+    </script>
+</body>
+</html>
